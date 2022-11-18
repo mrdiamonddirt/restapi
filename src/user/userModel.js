@@ -9,8 +9,8 @@ const userSchema = new Schema({
     },
     password: {
         type: String,
-        required: true,
-        match: /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/
+        required: true
+        // match: /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/
     },
     email: {
         type: String,
@@ -22,4 +22,4 @@ const userSchema = new Schema({
 
 const User = mongoose.model('User', userSchema);
 
-export default User;
+module.exports = User;
