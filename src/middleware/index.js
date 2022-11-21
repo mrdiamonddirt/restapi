@@ -28,3 +28,26 @@ exports.comparePassword = async (request, response, next) => {
   }
 }
 
+exports.tokenCheck = async (request, response, next) => {
+  try {
+    if (request.header('Authorization')) {
+      const token = request.header('Authorization').replace('Bearer ', '');
+      const decoded = JWT.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.id);
+      if (user) {
+        request.user = user;
+        console.log("token verified");
+        console.log(user)
+      } else {
+        console.log("token not verified");
+        throw new Error('User not found');
+      }
+    } else {
+      throw new Error('No token provided');
+    }
+    next();
+  } catch (error) {
+    console.log(error);
+    response.status(500).send({ error: error.message });
+  }
+}

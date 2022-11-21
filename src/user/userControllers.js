@@ -1,7 +1,6 @@
 const User = require("./userModel");
 const JWT = require("jsonwebtoken");
 
-
 exports.createUser = async (request, response) => {
   console.log(request);
   try {
@@ -58,12 +57,19 @@ exports.deleteUser = async (request, response) => {
   }
 };
 
-// how to proform password check in login route using bcrypt
+// how to perform password check in login route using bcrypt
 
 exports.loginUser = async (request, response) => {
-  try{
-    const user = await User.findOne({username: request.body.username});
-    response.status(200).send({user});
+  try {
+    if (request.user) {
+      console.log("user found");
+      response.status(200).send({ user: request.body.user });
+    } else {
+      const user = await User.findOne({ username: request.body.username });
+      const token = await JWT.sign({ _id: user._id }, process.env.JWT_SECRET);
+      console.log("token created");
+      response.status(200).send({ user, token });
+    }
   } catch (error) {
     console.log(error);
     response.status(500).send({ error: error.message });
