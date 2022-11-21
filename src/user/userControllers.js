@@ -1,11 +1,15 @@
 const User = require("./userModel");
-const bcrypt = require("bcrypt");
+const JWT = require("jsonwebtoken");
+
 
 exports.createUser = async (request, response) => {
   console.log(request);
   try {
     const newUser = await User.create(request.body);
-    response.status(201).send({ user: newUser });
+    const token = await JWT.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
+    response.status(201).send({ user: newUser, token });
   } catch (error) {
     console.log(error);
     response.status(500).send({ error: error.message });
@@ -57,21 +61,9 @@ exports.deleteUser = async (request, response) => {
 // how to proform password check in login route using bcrypt
 
 exports.loginUser = async (request, response) => {
-  try {
-    const user = await User.findOne({ username: request.body.username });
-    if (user) {
-      const validPassword = await bcrypt.compare(
-        request.body.password,
-        user.password
-      );
-      if (validPassword) {
-        response.status(200).send({ user });
-      } else {
-        response.status(401).send({ error: "Invalid Password" });
-      }
-    } else {
-      response.status(401).send({ error: "Invalid Username" });
-    }
+  try{
+    const user = await User.findOne({username: request.body.username});
+    response.status(200).send({user});
   } catch (error) {
     console.log(error);
     response.status(500).send({ error: error.message });
