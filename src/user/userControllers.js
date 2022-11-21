@@ -1,4 +1,5 @@
 const User = require("./userModel");
+const bcrypt = require("bcrypt");
 
 exports.createUser = async (request, response) => {
   console.log(request);
@@ -20,29 +21,59 @@ exports.listUsers = async (request, response) => {
     console.log(error);
     response.status(500).send({ error: error.message });
   }
-}
+};
 
 exports.updateUser = async (request, response) => {
   console.log(request);
   try {
-  //  get user by username and update password
-  console.log('trying to update user');
-  const user  = await User.findOneAndUpdate({ users: request.body.username }, { password: request.body.password }, );
-  console.log('user updated');
-  response.status(200).send({ user });
-  } catch (error) {
-    console.log(error);
-    response.status(500).send({ error: error.message });
-  }
-}
-
-exports.deleteUser = async (request, response) => {
-  console.log(request);
-  try {
-    const user = await User.findOneAndDelete({ users: request.body.username }, { password: request.body.password });
+    //  get user by username and update password
+    console.log("trying to update user");
+    const user = await User.findOneAndUpdate(
+      { users: request.body.username },
+      { password: request.body.password }
+    );
+    console.log("user updated");
     response.status(200).send({ user });
   } catch (error) {
     console.log(error);
     response.status(500).send({ error: error.message });
   }
-}
+};
+
+exports.deleteUser = async (request, response) => {
+  console.log(request);
+  try {
+    const user = await User.findOneAndDelete(
+      { users: request.body.username },
+      { password: request.body.password }
+    );
+    response.status(200).send({ user });
+  } catch (error) {
+    console.log(error);
+    response.status(500).send({ error: error.message });
+  }
+};
+
+// how to proform password check in login route using bcrypt
+
+exports.loginUser = async (request, response) => {
+  try {
+    const user = await User.findOne({ username: request.body.username });
+    if (user) {
+      const validPassword = await bcrypt.compare(
+        request.body.password,
+        user.password
+      );
+      if (validPassword) {
+        response.status(200).send({ user });
+      } else {
+        response.status(401).send({ error: "Invalid Password" });
+      }
+    } else {
+      response.status(401).send({ error: "Invalid Username" });
+    }
+  } catch (error) {
+    console.log(error);
+    response.status(500).send({ error: error.message });
+  }
+};
