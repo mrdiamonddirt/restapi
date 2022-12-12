@@ -25,21 +25,28 @@ io.on("connection", (socket) => {
     users[socket.id] = {
         socket_id: socket.id,
     };
+    let user_id = Object.keys(users).length;
     // send message to client when connected
-    socket.send("Welcome to the chat");
+    io.emit("chat message", "Welcome to the chat");
+    io.emit("chat message", "Type hi to get a response");
+    io.emit("chat message", "Type get users to get a list of users");
+    io.emit("chat message", `there is currently ${user_id} connected users`);
     // listen for messages from client
     socket.on("chat message", (msg) => {
         console.log("message: " + msg);
         io.emit("chat message", msg);
         // if message is hi, send hello back
         if (msg === "hi") {
-            io.emit("chat message", "hello");
+            setTimeout(() => {
+                io.emit("chat message", "hello from the server");
+            }, 2000);
         }
         // if message is get users, send users back
         if (msg === "get users") {
             // socket.send(
             //     "users: " + users.map((user) => user.socket_id).join(", ")
             // );
+            io.send();
             io.emit(
                 "chat message",
                 Object.keys(users).length + " users connected"
@@ -58,6 +65,9 @@ io.on("connection", (socket) => {
     console.log("a user connected");
     socket.on("disconnect", () => {
         console.log("user disconnected");
+        // remove user from users array
+        io.emit("chat message", "user disconnected");
+        delete users[socket.id];
     });
 });
 
