@@ -1,7 +1,6 @@
 const bcrypt = require('bcrypt');
 const User = require('../user/userModel');
 const JWT = require('jsonwebtoken');
-const validator = require('email-validator');
 
 exports.hashPassword = async (request, response, next) => {
   try {
@@ -52,36 +51,3 @@ exports.tokenCheck = async (request, response, next) => {
     response.status(500).send({ error: error.message });
   }
 }
-
-exports.validateEmail = async (request, response, next) => {
-try {
-  if (validator.validate(request.body.email)) {
-    console.log("email is valid");
-    next();
-  } else {
-    throw new Error('Invalid email');
-  }
-} catch (error) {
-  console.log(error);
-  response.status(500).send({ error: error.message });
-}
-}
-
-//EMAIL VALIDATION WITH REGULAR EXPRESSIONS WITHOUT USING A NPM LIBARY
-
-// exports.validateEmail = async (request, response, next) => {
-//     try {
-//         const regex = /^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/; 
-//         console.log(regex.test(request.body.email)) // returns true or false
-//         if (regex.test(request.body.email)) {
-//             console.log("vaild email")
-//             next()
-//         } else {
-//             throw new Error ("invaild email please try again")
-//         }
- 
-//     } catch (error) {
-//         console.log(error)
-//         response.status(500).send({error: error.message})
-//     }
-// }
